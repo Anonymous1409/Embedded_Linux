@@ -1,0 +1,1 @@
+void _multiply(int* a, int* b, int* c);

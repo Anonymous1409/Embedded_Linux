@@ -1,0 +1,1 @@
+void _subtract(int* a, int* b, int* c);
