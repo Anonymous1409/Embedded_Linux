@@ -1,0 +1,338 @@
+https://chatgpt.com/c/682847ce-b520-8000-9a88-4ba8a5140c8c
+
+#include <pthread.h>
+
+//Basic threading example in C
+
+void* say_hello(void* arg) {
+    printf("Hello from the thread!\n");
+    return NULL;
+}
+
+int main() {
+    pthread_t thread;
+
+    // Create thread
+    pthread_create(&thread, NULL, say_hello, NULL);
+
+    // Wait for the thread to finish
+    pthread_join(thread, NULL);
+
+    printf("Thread finished.\n");
+    return 0;
+}
+
+//Data Parsing
+
+void* print_number(void* arg) {
+    int num = *(int*)arg;
+    printf("Thread received number: %d\n", num);
+    return NULL;
+}
+
+int main() {
+    pthread_t thread;
+    int value = 42;
+
+    pthread_create(&thread, NULL, print_number, &value);
+    pthread_join(thread, NULL);
+
+    return 0;
+}
+
+//Adding Mutex for thread safety
+
+#include <stdio.h>
+#include <pthread.h>
+
+int shared_result = 0;
+pthread_mutex_t lock;
+
+void* add(void* arg) {
+    int* nums = (int*)arg;
+    int result = nums[0] + nums[1];
+
+    pthread_mutex_lock(&lock);
+    shared_result = result;
+    printf("Addition stored: %d\n", shared_result);
+    pthread_mutex_unlock(&lock);
+
+    return NULL;
+}
+
+void* subtract(void* arg) {
+    int* nums = (int*)arg;
+    int result = nums[0] - nums[1];
+
+    pthread_mutex_lock(&lock);
+    shared_result = result;
+    printf("Subtraction stored: %d\n", shared_result);
+    pthread_mutex_unlock(&lock);
+
+    return NULL;
+}
+
+int main() {
+    pthread_t t1, t2;
+    int numbers[2] = {20, 8};
+
+    pthread_mutex_init(&lock, NULL);
+
+    pthread_create(&t1, NULL, add, numbers);
+    pthread_create(&t2, NULL, subtract, numbers);
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    pthread_mutex_destroy(&lock);
+    return 0;
+}
+/*
+pthread_mutex_t lock is a mutual exclusion lock.
+
+Only one thread can access the shared_result at a time.
+
+You must initialize and destroy the mutex.
+
+
+non-atomic increments.
+*/
+
+//Optional Topics
+/*
+Want to continue with any of these?
+
+✅ Threads with return values (pthread_exit, pthread_join result).
+
+✅ A thread pool (reuse threads to process jobs).
+
+✅ Multiple producers and consumers (classic synchronization problem).
+
+✅ Clean Makefile to build this multithreaded project.
+*/
+
+1. Threads with Return Values (pthread_exit, pthread_join)
+🔍 Description:
+Normally, threads take void* arguments and return void* results. This allows them to return any kind of data using dynamic memory.
+
+🧠 Key Concepts:
+Use pthread_exit() to return a pointer to a value.
+
+Use pthread_join() to collect that return value in the main thread.
+
+Thread must return dynamically allocated memory so the value is not lost when thread exits.
+
+⚠️ Memory returned via pthread_exit() must be freed by the caller after pthread_join().
+
+//Mutex
+
+Change	Why
+pthread_mutex_t lock;	Declares a mutex for protecting shared state.
+pthread_mutex_init(&lock, NULL);	Initializes the mutex before use.
+pthread_mutex_lock(&lock);	Ensures only one thread can modify buffer state at a time.
+pthread_mutex_unlock(&lock);	Releases the lock so others can proceed.
+pthread_mutex_destroy(&lock);	Frees resources at the end of the program.
+
+
+//Condition Variables in threading
+
+Basic Theory: Condition Variables
+🧩 What Is a Condition Variable?
+A condition variable allows threads to sleep until a condition is true, instead of:
+
+constantly checking (busy-waiting)
+
+wasting CPU (sleep() loops)
+
+It works with a mutex, and lets a thread:
+
+wait for a signal (e.g., “buffer has space” or “buffer has data”)
+
+wake up another thread when a condition changes
+
+🔁 In Producer-Consumer:
+Thread	Waits if...	Signals when...
+Producer	buffer is full	it adds an item
+Consumer	buffer is empty	it removes an item
+
+🔧 API Essentials
+pthread_cond_t cond: condition variable
+
+pthread_cond_init(&cond, NULL);: initialize
+
+pthread_cond_wait(&cond, &mutex);: wait + release lock until signaled
+
+pthread_cond_signal(&cond);: wake one waiting thread
+
+pthread_cond_broadcast(&cond);: wake all
+
+pthread_cond_destroy(&cond);: cleanup
+
+
+//Mutex vs semaphore vs spinlock
+1. Mutex (Mutual Exclusion Lock)
+✅ Purpose:
+Used to protect critical sections so only one thread at a time can access a shared resource.
+
+🔧 Key Features:
+Feature	Mutex
+Ownership	Yes (thread that locks must unlock)
+Blocking	Yes (thread sleeps if lock not available)
+Fairness	Generally fair (FIFO or priority based)
+Kernel involvement	Yes (may cause context switches)
+
+📌 Example Use:
+c
+Copy
+Edit
+pthread_mutex_lock(&mutex);
+// Critical section
+pthread_mutex_unlock(&mutex);
+🧠 Use when:
+Threads must wait if the lock isn’t available.
+
+CPU shouldn’t be wasted spinning.
+
+🧮 2. Semaphore
+✅ Purpose:
+Used for signaling and for resource counting. More flexible than mutexes.
+
+🔧 Key Features:
+Feature	Semaphore
+Ownership	No (any thread can wait or post)
+Blocking	Yes (threads block if count is 0)
+Counting	Yes (can be binary or counting)
+Use Case	Producer-consumer, limiting access
+
+📌 Example Use (POSIX):
+c
+Copy
+Edit
+sem_wait(&sem);   // decrement, block if zero
+// Critical section
+sem_post(&sem);   // increment
+🧠 Use when:
+You want to limit access to N resources.
+
+You need to signal between threads.
+
+🔄 3. Spinlock
+✅ Purpose:
+Also for mutual exclusion, but instead of blocking, the thread busy-waits (keeps spinning) until the lock is free.
+
+🔧 Key Features:
+Feature	Spinlock
+Blocking	No (spins until lock is free)
+CPU usage	High during contention
+Fast path	Very fast if lock is uncontended
+Kernel involvement	No (userspace spin)
+
+📌 Example Use:
+c
+Copy
+Edit
+pthread_spin_lock(&spin);
+// Critical section
+pthread_spin_unlock(&spin);
+🧠 Use when:
+Lock is held very briefly.
+
+Threads are on different CPU cores.
+
+You want to avoid context switches.
+
+⚖️ Summary Comparison
+Feature	Mutex	Semaphore	Spinlock
+Blocks thread?	Yes	Yes	❌ No (spins)
+Ownership	Yes	No	No
+Countable?	No	✅ Yes	No
+CPU-friendly	✅ Yes	✅ Yes	❌ No (spins)
+Used for	Mutual exclusion	Signaling/resource pool	Mutual exclusion (short time)
+Context Switch	✅ Possible	✅ Possible	❌ None
+
+🔍 Use Case Examples
+Use Case	Choose
+Protect shared buffer	Mutex
+N threads access 3 printers	Counting Semaphore (init to 3)
+Wait for producer to add items	Binary Semaphore
+Short fast lock on shared counter	Spinlock
+
+
+//Difference
+🧩 The Core Idea All Share:
+All three help solve race conditions by ensuring that only allowed threads access shared resources at any time.
+
+⚖️ Detailed Comparison Table
+Feature	Mutex	Semaphore	Spinlock
+🔁 Purpose	Mutual exclusion (1 thread at a time)	Signaling & resource counting (0..N)	Mutual exclusion with busy waiting
+🧠 Concept	Lock/unlock by same thread	Threads increment/decrement a counter	Lock with CPU spinning
+👤 Ownership	Yes – Only locking thread can unlock	No – Any thread can wait/post	No – Anyone can lock/unlock
+📊 Counting	No	✅ Yes (Counting or binary semaphore)	No
+🧍 Blocking behavior	Blocks thread and sleeps (context switch)	Blocks thread and sleeps	Doesnt block – spins (busy-wait)
+⚙️ CPU Usage When Locked	Low (waits passively)	Low (waits passively)	High (wastes CPU cycles spinning)
+🧩 Use Case	Critical section, shared data	Producer-consumer, resource pool	Fast lock around small code segments
+🔄 Context Switches	Yes	Yes	No
+⚡ Overhead (no contention)	Medium	Medium	✅ Lowest (zero syscall/context switch)
+🚫 Deadlock Risk	Medium (if not unlocked)	High (if semaphore mismanaged)	Medium (less deadlock, more starvation)
+⚖️ Fairness	Usually FIFO or priority-based	FIFO or priority-based (if supported)	No fairness guarantee
+✅ Example	pthread_mutex_lock/unlock	sem_wait/post	pthread_spin_lock/unlock
+
+🧠 When to Use What?
+Scenario	Best Tool	Why
+Protect shared buffer (typical critical section)	Mutex	Easy to use, automatically blocks if in use
+Limit N threads to N printers	Semaphore	Allows N accessors, not just one
+Fast operation with high-frequency access	Spinlock	Avoids context switch if lock is held briefly
+Signal a worker thread to start after data ready	Semaphore	Ideal for signaling between threads
+CPU-bound thread on multi-core CPUs	Spinlock	Fast if thread will acquire lock quickly
+IO-bound thread that can sleep	Mutex	Sleeping is okay, saves CPU
+
+🧠 More Explanations:
+🔐 Mutex:
+A basic lock. One thread at a time.
+
+If already locked, the thread sleeps (no CPU waste).
+
+Safe and common.
+
+🧠 Analogy: Like a restroom key – only one person can take it, and they must return it.
+
+🔢 Semaphore:
+Counter of how many threads can enter.
+
+Binary Semaphore: acts like a mutex (0 or 1)
+
+Counting Semaphore: more flexible (e.g., 5 printers → init to 5)
+
+Good for signaling, not just locking.
+
+🧠 Analogy: You have 3 identical printers. Up to 3 people can print at once — others wait.
+
+🔄 Spinlock:
+Threads don’t sleep, they spin (poll in a loop).
+
+Very efficient when:
+
+Lock is held for very short time
+
+Running on multiple CPU cores
+
+Bad for battery life, thermal, and power usage.
+
+🧠 Analogy: Instead of waiting your turn in a line, you keep asking “Is it my turn yet? … Now? … Now?” 🤯
+
+🧪 Bonus Code Snippet Summary
+Lock Type	Pseudo-Usage Code
+Mutex	pthread_mutex_lock(&m); /* work */ pthread_mutex_unlock(&m);
+Semaphore	sem_wait(&sem); /* work */ sem_post(&sem);
+Spinlock	pthread_spin_lock(&s); /* quick work */ pthread_spin_unlock(&s);
+
+
+//
+ Thread Pool vs General Multithreading
+A thread pool is just a design pattern on top of multithreading. It manages:
+
+Thread lifecycle.
+
+Job queuing.
+
+Load balancing.
