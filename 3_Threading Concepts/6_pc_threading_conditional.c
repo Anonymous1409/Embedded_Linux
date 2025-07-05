@@ -18,8 +18,8 @@ void* produce(void* arg)
     {
         pthread_mutex_lock(&lock);
 
-        // Wait if buffer is full
-        while (count == SIZE) {
+        while (count == SIZE) 
+        {
             printf("Buffer full, producer waiting...\n");
             pthread_cond_wait(&not_full, &lock);
         }
@@ -30,11 +30,10 @@ void* produce(void* arg)
         count++;
         val++;
 
-        // Signal that buffer is not empty now
         pthread_cond_signal(&not_empty);
         pthread_mutex_unlock(&lock);
 
-        sleep(1);  // simulate time
+        sleep(1);
     }
     return NULL;
 }
@@ -45,8 +44,8 @@ void* consume(void* arg)
     {
         pthread_mutex_lock(&lock);
 
-        // Wait if buffer is empty
-        while (count == 0) {
+        while (count == 0) 
+        {
             printf("Buffer empty, consumer waiting...\n");
             pthread_cond_wait(&not_empty, &lock);
         }
@@ -56,11 +55,10 @@ void* consume(void* arg)
         c_ctr = (c_ctr + 1) % SIZE;
         count--;
 
-        // Signal that buffer is not full now
         pthread_cond_signal(&not_full);
         pthread_mutex_unlock(&lock);
 
-        sleep(1);  // simulate time
+        sleep(1);
     }
     return NULL;
 }
@@ -69,25 +67,21 @@ int main()
 {
     pthread_t producer_thread, consumer_thread;
 
-    // Initialize mutex and condition variables
     pthread_mutex_init(&lock, NULL);
     pthread_cond_init(&not_full, NULL);
     pthread_cond_init(&not_empty, NULL);
 
-    // Create producer and consumer threads
     pthread_create(&producer_thread, NULL, produce, NULL);
     pthread_create(&consumer_thread, NULL, consume, NULL);
 
     pthread_join(producer_thread, NULL);
     pthread_join(consumer_thread, NULL);
 
-    // Destroy mutex and condition variables
     pthread_mutex_destroy(&lock);
     pthread_cond_destroy(&not_full);
     pthread_cond_destroy(&not_empty);
 
     return 0;
 }
-
 
 // gcc 6_pc_threading_conditional.c -o a.exe

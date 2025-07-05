@@ -7,16 +7,16 @@
 
 int p_ctr, c_ctr, count;
 int buffer[SIZE];
-pthread_mutex_t lock;  // 🔐 Mutex for synchronizing access to shared resources
+pthread_mutex_t lock;
 
 void* produce(void* arg)
 {
     int val = 1;
     while (1)
     {
-        sleep(1);  // simulate delay
+        sleep(1);
 
-        pthread_mutex_lock(&lock);  // 🔒 Lock before accessing shared state
+        pthread_mutex_lock(&lock);
 
         if (count == SIZE)
             printf("Can't produce (buffer full)\n");
@@ -29,7 +29,7 @@ void* produce(void* arg)
             val++;
         }
 
-        pthread_mutex_unlock(&lock);  // 🔓 Unlock after done
+        pthread_mutex_unlock(&lock);
 
     }
     return NULL;
@@ -39,9 +39,9 @@ void* consume(void* arg)
 {
     while (1)
     {
-        sleep(1);  // simulate delay
+        sleep(1);
 
-        pthread_mutex_lock(&lock);  // 🔒 Lock before accessing shared state
+        pthread_mutex_lock(&lock);
 
         if (count == 0)
             printf("Can't consume (buffer empty)\n");
@@ -53,7 +53,7 @@ void* consume(void* arg)
             count--;
         }
 
-        pthread_mutex_unlock(&lock);  // 🔓 Unlock after done
+        pthread_mutex_unlock(&lock);
     }
     return NULL;
 }
@@ -62,20 +62,16 @@ int main()
 {
     pthread_t p, c;
 
-    // 🧰 Initialize state
     count = 0;
     p_ctr = c_ctr = 0;
-    pthread_mutex_init(&lock, NULL);  // 🛠 Initialize mutex
+    pthread_mutex_init(&lock, NULL);
 
-    // 🚀 Create threads
     pthread_create(&p, NULL, produce, NULL);
     pthread_create(&c, NULL, consume, NULL);
 
-    // ⏳ Wait for threads
     pthread_join(p, NULL);
     pthread_join(c, NULL);
 
-    // 🧹 Clean up
     pthread_mutex_destroy(&lock);
     return 0;
 }
