@@ -1,0 +1,20 @@
+Objective:
+To build a functional audio capture and streaming system on Raspberry Pi 4 using standard Linux kernel features and APIs like ALSA, kernel timers, workqueues, and socket programming—demonstrating audio data flow from capture to network transmission.
+
+Task List:
+
+1. Set up Raspberry Pi with ALSA and kernel headers
+2. Use ALSA or USB audio drivers for audio capture
+3. Write a simple kernel module or user-space tool to access audio via ALSA API
+4. Use existing kernel linked list (list.h) for buffer management
+5. Use workqueue or kthread for background processing
+6. Use mutex, spinlock, or wait_queue for synchronization
+7. Allocate memory using kmalloc, get_free_pages, or vmalloc
+8. Expose controls via /proc or /sysfs (no custom syscalls)
+9. Schedule tasks using hrtimer or existing kernel timers
+10. Use mmap() from user-space to access shared buffers
+11. Transmit audio using user-space socket programming (TCP/UDP)
+12. Rely on Linux for cache coherence and DMA handling
+13. Use existing to ols (arecord, aplay, ffmpeg) for testing
+14. Document architecture and flow using standard Linux APIs
+15. Profile using perf, dmesg, and ALSA utilities
