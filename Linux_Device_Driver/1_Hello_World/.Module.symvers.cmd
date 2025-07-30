@@ -1,0 +1,1 @@
+savedcmd_/home/rudra/Desktop/Embedded_Linux/Linux_Device_Driver/1_Hello_World/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/rudra/Desktop/Embedded_Linux/Linux_Device_Driver/1_Hello_World/Module.symvers -T /home/rudra/Desktop/Embedded_Linux/Linux_Device_Driver/1_Hello_World/modules.order -i Module.symvers -e 
