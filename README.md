@@ -1,8 +1,7 @@
 # Embedded_Linux
 Practicing embedded C and Linux Concepts
 
-Setup Details
-Linux version: 6.8.0-60-generic
+Linux version: 6.8.0-60-generic | 
 gcc version: gcc-12 (Ubuntu 12.3.0-1ubuntu1~22.04) 12.3.0
 
 C_C++_Concepts
