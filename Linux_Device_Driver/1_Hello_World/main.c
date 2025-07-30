@@ -1,3 +1,9 @@
+/********************************************************************************
+*  @file       main.c
+*  @brief      Hello World kernel module for Linux.
+*  @author     Rudra
+* *******************************************************************************/
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 
@@ -19,6 +25,7 @@ void end(void)
 {
     printk(KERN_INFO "Module is Ending...\n");
 }
+
 
 
 // Called everytime when module is loaded
